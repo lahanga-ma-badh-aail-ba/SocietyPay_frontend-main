@@ -5,7 +5,7 @@ import TenantManagement from "@/components/admin/TenantManagement";
 import PaymentStatus from "@/components/admin/PaymentStatus";
 import OccupancyOverview from "@/components/admin/OccupancyOverview";
 import AdminPaymentControls from "@/components/admin/AdminPaymentCntrols";
-import { Users, Receipt, Building } from "lucide-react";
+import { Users, Receipt, Building, RefreshCw } from "lucide-react";
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("tenants");
@@ -34,7 +34,7 @@ const Admin = () => {
               <span className="hidden sm:inline">Occupancy</span>
             </TabsTrigger>
             <TabsTrigger value="controls" className="gap-2">
-              <Building className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
               <span className="hidden sm:inline">Controls</span>
             </TabsTrigger>
           </TabsList>

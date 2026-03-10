@@ -11,6 +11,9 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import HelpFAQ from "./pages/Help";
+import Contact from "./pages/Contact";
+// import Inbox from "./pages/Inbox";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,30 @@ const App = () => (
               }
             />
             <Route
+              path="/help"
+              element={
+                <ProtectedRoute>
+                  <HelpFAQ />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contact"
+              element={
+                <ProtectedRoute>
+                  <Contact />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/profile"
               element={
                 <ProtectedRoute>
@@ -39,6 +66,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* <Route
+              path="/inbox"
+              element={
+                <ProtectedRoute>
+                  <Inbox />
+                </ProtectedRoute>
+              }
+            /> */}
             {/* UPDATED: Protect admin route */}
             <Route
               path="/admin"

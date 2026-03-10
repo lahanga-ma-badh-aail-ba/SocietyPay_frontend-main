@@ -37,7 +37,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, UserPlus, Trash2, Shield, User as UserIcon, SquarePen } from "lucide-react";
+import { Plus, UserPlus, Trash2, Shield, User as UserIcon, SquarePen, Eye, EyeClosed } from "lucide-react";
 import { authAPI, User, Flat, flatAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -54,9 +54,11 @@ interface RegisterData {
 interface UpdateData {
   name: string;
   email: string;
+  phone?: string;
   role: 'ADMIN' | 'USER';
   flatId?: string | null;
   ownerName?: string;
+  ownerPhone?: string;
   monthlyMaintenance?: number;
 }
 
@@ -79,15 +81,19 @@ const TenantManagement = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [flats, setFlats] = useState<Flat[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     role: "USER" as "ADMIN" | "USER",
     flatNumber: "",
     ownerName: "",
+    ownerEmail: "",
+    ownerPhone: "",
     monthlyMaintenance: "",
   });
 
@@ -112,9 +118,13 @@ const TenantManagement = () => {
   const [editUser, setEditUser] = useState({
     name: "",
     email: "",
+    password: "",
+    phone: "",
     role: "USER" as "ADMIN" | "USER",
     flatId: "",
     ownerName: "",
+    ownerPhone: "",
+    ownerEmail: "",
     monthlyMaintenance: "",
   });
 
@@ -179,10 +189,13 @@ const TenantManagement = () => {
       setNewUser({
         name: "",
         email: "",
+        phone: "",
         password: "",
         role: "USER",
         flatNumber: "",
         ownerName: "",
+        ownerEmail: "",
+        ownerPhone: "",
         monthlyMaintenance: "",
       });
       setIsAddOpen(false);
@@ -209,9 +222,13 @@ const TenantManagement = () => {
   setEditUser({
     name: user.name,
     email: user.email,
+    password: user.email,
+    phone: user.phone || "",
     role: user.role,
     flatId: user.flat?.id || "",
     ownerName: user.flat?.ownerName || user.name,
+    ownerEmail: user.flat?.ownerEmail || "",
+    ownerPhone: user.flat?.ownerPhone || "",
     monthlyMaintenance: user.flat?.monthlyMaintenance?.toString() || "",
   });
   setIsEditOpen(true);
@@ -237,6 +254,7 @@ const TenantManagement = () => {
     const updateData: UpdateData = {
       name: editUser.name,
       email: editUser.email,
+      phone: editUser.phone,
       role: editUser.role,
     };
 
@@ -244,6 +262,7 @@ const TenantManagement = () => {
     if (editUser.flatId && editUser.flatId.trim() !== "") {
       updateData.flatId = editUser.flatId; // ✅ UUID from DB
       updateData.ownerName = editUser.ownerName || editUser.name;
+      updateData.ownerPhone = editUser.ownerPhone || "";
       updateData.monthlyMaintenance =
         parseFloat(editUser.monthlyMaintenance) || 0;
     } else {
@@ -370,6 +389,16 @@ const TenantManagement = () => {
                     placeholder="Enter password"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={newUser.phone}
+                    onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                    placeholder="Enter phone number (e.g., +91 9876543210)"
+                  />
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="role">Role *</Label>
@@ -388,54 +417,8 @@ const TenantManagement = () => {
                 </div>
 
                 {/* Flat Details */}
-                {/* <div className="pt-4 border-t">
-                  <h3 className="font-medium mb-3">Flat Details (Optional)</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="flatNumber">Flat Number</Label>
-                      <Select
-                        value={newUser.flatNumber || "none"}
-                        onValueChange={(value) => setNewUser({ ...newUser, flatNumber: value === "none" ? "" : value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Flat Number" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">No Flat</SelectItem>
-                          {FLATS.map((flat) => (
-                            <SelectItem key={flat} value={flat}>
-                              {flat}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="ownerName">Owner Name</Label>
-                      <Input
-                        id="ownerName"
-                        value={newUser.ownerName}
-                        onChange={(e) => setNewUser({ ...newUser, ownerName: e.target.value })}
-                        placeholder="Property owner name (defaults to user name)"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="maintenance">Monthly Maintenance (₹)</Label>
-                      <Input
-                        id="maintenance"
-                        type="number"
-                        value={newUser.monthlyMaintenance}
-                        onChange={(e) => setNewUser({ ...newUser, monthlyMaintenance: e.target.value })}
-                        placeholder="e.g., 3500"
-                      />
-                    </div>
-                  </div>
-                </div> */}
                 <div className="pt-4 border-t">
-                  <h3 className="font-medium mb-3">Flat Details (Optional)</h3>
+                  <h3 className="font-medium mb-3">Flat Owner Data</h3>
                   
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -494,6 +477,26 @@ const TenantManagement = () => {
                         placeholder="Property owner name (defaults to user name)"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ownerPhone">Owner Email Address</Label>
+                      <Input
+                        id="ownerEmail"
+                        type="tel"
+                        value={newUser.ownerEmail}
+                        onChange={(e) => setNewUser({ ...newUser, ownerEmail: e.target.value })}
+                        placeholder="Owner's email address"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ownerPhone">Owner Phone Number</Label>
+                      <Input
+                        id="ownerPhone"
+                        type="tel"
+                        value={newUser.ownerPhone}
+                        onChange={(e) => setNewUser({ ...newUser, ownerPhone: e.target.value })}
+                        placeholder="Owner's phone number"
+                      />
+                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="maintenance">Monthly Maintenance (₹)</Label>
@@ -529,6 +532,7 @@ const TenantManagement = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Flat</TableHead>
                     <TableHead>Maintenance</TableHead>
@@ -540,6 +544,13 @@ const TenantManagement = () => {
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
+                      <TableCell>  {/* 🆕 Add Phone cell */}
+                        {user.phone ? (
+                          <span className="text-sm">{user.phone}</span>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">No phone</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {user.role === 'ADMIN' ? (
                           <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
@@ -602,7 +613,7 @@ const TenantManagement = () => {
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-3 py-4 max-h-[70vh] overflow-y-auto pr-2 ps-2">
             <div className="space-y-2">
               <Label htmlFor="edit-name">Full Name *</Label>
               <Input
@@ -625,6 +636,37 @@ const TenantManagement = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="password">Password *</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={editUser.password}
+                  onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
+                  placeholder="Enter password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeClosed /> : <Eye />}
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={ editUser.phone}
+                    onChange={(e) => setEditUser({ ...editUser, phone: e.target.value })}
+                    placeholder="Enter phone number (e.g., +91 9876543210)"
+                  />
+                </div>
+
+            <div className="space-y-2">
               <Label htmlFor="edit-role">Role *</Label>
               <Select
                 value={editUser.role}
@@ -640,37 +682,6 @@ const TenantManagement = () => {
               </Select>
             </div>
 
-            {/* <div className="space-y-2">
-              <Label htmlFor="edit-flatNumber">Flat Number</Label>
-              <Select
-                value={editUser.flatId || "none"}
-                onValueChange={(value) =>
-                  setEditUser({
-                    ...editUser,
-                    flatId: value === "none" ? "" : value,
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Flat" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="none">No Flat</SelectItem>
-
-                  {flats.map((flat) => (
-                    <SelectItem key={flat.id} value={flat.id}>
-                      {flat.flatNumber}
-                      {flat.user && (
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          (Assigned)
-                        </span>
-                      )}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
             <div className="space-y-2">
               <Label htmlFor="edit-flatNumber">Flat Number</Label>
               <Select
@@ -739,6 +750,28 @@ const TenantManagement = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="ownerPhone">Owner Email Address</Label>
+              <Input
+                id="ownerEmail"
+                type="tel"
+                value={editUser.ownerEmail}
+                onChange={(e) => setEditUser({ ...editUser, ownerEmail: e.target.value })}
+                placeholder="Owner's email address"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ownerPhone">Owner Phone Number</Label>
+              <Input
+                id="ownerPhone"
+                type="tel"
+                value={editUser.ownerPhone}
+                onChange={(e) => setEditUser({ ...editUser, ownerPhone: e.target.value })}
+                placeholder="Owner's phone number"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="edit-maintenance">Monthly Maintenance (₹)</Label>
               <Input
                 id="edit-maintenance"
@@ -748,6 +781,7 @@ const TenantManagement = () => {
                 placeholder="e.g., 3500"
               />
             </div>
+
           </div>
           <DialogFooter>
             <Button 

@@ -184,7 +184,7 @@ const Index = () => {
   }, []);
 
     // Static data for demo
-  const duesAmount = 1500;
+  // const duesAmount = 1500;
   const latestPayment = {
     amount: 1500,
     transactionId: "UPI123456789",

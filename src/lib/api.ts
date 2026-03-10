@@ -94,15 +94,19 @@ api.interceptors.response.use(
 
 // Types
 export interface User {
+  phone: string;
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: 'ADMIN' | 'USER';
   flatId?: string | null;
   flat?: {
     id: string;
     flatNumber: string;
     ownerName: string;
+    ownerPhone?: string; 
+    ownerEmail?: string; 
     monthlyMaintenance: number;
   } | null;
   createdAt?: string;
@@ -118,6 +122,7 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  phone?: string;
   role?: 'ADMIN' | 'USER';
   flatId?: string;
 }
@@ -138,11 +143,13 @@ export interface Flat {
   flatNumber: string;
   ownerName: string;
   ownerEmail: string;
+  ownerPhone?: string; 
   monthlyMaintenance: number;
   user?: {
     id: string;
     name: string;
     email: string;
+    phone?: string;
   } | null;
 }
 
